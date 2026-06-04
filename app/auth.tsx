@@ -5,6 +5,9 @@ import {
     Fredoka_700Bold,
     useFonts,
 } from '@expo-google-fonts/fredoka';
+import { FontAwesome5 } from '@expo/vector-icons';
+import * as AuthSession from 'expo-auth-session';
+import * as WebBrowser from 'expo-web-browser';
 import React, { useEffect, useState } from 'react';
 import {
     Alert,
@@ -18,11 +21,8 @@ import {
     TextInput,
     View,
 } from 'react-native';
-import { FontAwesome5 } from '@expo/vector-icons';
-import * as AuthSession from 'expo-auth-session';
-import * as WebBrowser from 'expo-web-browser';
-WebBrowser.maybeCompleteAuthSession();
 import Animated, {
+    Easing,
     FadeInDown,
     interpolate,
     useAnimatedStyle,
@@ -32,16 +32,23 @@ import Animated, {
     withSpring,
     withTiming,
 } from 'react-native-reanimated';
+WebBrowser.maybeCompleteAuthSession();
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 
 const COLORS = {
-  charcoal: '#262626', // Darkest
-  ash: '#4D4D4D',      // Medium Dark
-  silver: '#B3B3B3',   // Medium Light
-  cloud: '#E6E6E6',    // Very Light Gray
-  paper: '#FFFFFF',    // Pure White
-  ink: '#1A1A1A',      // Contrast Ink
+  grape: '#080808',
+  peach: '#2F2F2F',
+  lavender: '#5C5C5C',
+  mint: '#151515',
+  cream: '#0E0E0E',
+  ink: '#F3F3F3',
+  coral: '#AFAFAF',
+  bubble: '#252525',
+  paper: '#131313',
+  ash: '#D8D8D8',
+  cloud: '#292929',
+  silver: '#9E9E9E',
 };
 
 export default function RetroGrayscaleAuth() {
@@ -50,6 +57,7 @@ export default function RetroGrayscaleAuth() {
   const [googleLoading, setGoogleLoading] = useState(false);
   const transition = useSharedValue(0);
   const logoBounce = useSharedValue(0);
+  const labelFloat = useSharedValue(0);
 
   const [fontsLoaded] = useFonts({
     Fredoka_400Regular,
@@ -102,12 +110,20 @@ export default function RetroGrayscaleAuth() {
     }
   };
 
-  // Very subtle bounce for a professional "old" feel
+  // Gentle bounce for a smooth, cute floating logo
   useEffect(() => {
     logoBounce.value = withRepeat(
       withSequence(
-        withTiming(-5, { duration: 2500 }),
-        withTiming(0, { duration: 2500 })
+        withTiming(-4, { duration: 1800, easing: Easing.inOut(Easing.quad) }),
+        withTiming(0, { duration: 1800, easing: Easing.inOut(Easing.quad) })
+      ),
+      -1,
+      true
+    );
+    labelFloat.value = withRepeat(
+      withSequence(
+        withTiming(-2, { duration: 1800, easing: Easing.inOut(Easing.quad) }),
+        withTiming(0, { duration: 1800, easing: Easing.inOut(Easing.quad) })
       ),
       -1,
       true
@@ -147,25 +163,30 @@ export default function RetroGrayscaleAuth() {
     ],
   }));
 
+  const animatedLabelStyle = useAnimatedStyle(() => ({
+    transform: [{ translateY: labelFloat.value }],
+  }));
+
   if (!fontsLoaded) return null;
 
   return (
     <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={styles.container}>
-      
+      <View style={styles.cartoonBubbleTop} />
+      <View style={styles.cartoonBubbleBottom} />
       {/* SIGN UP SIDE (DARK GRAY) */}
-      <Animated.View style={[styles.side, { backgroundColor: COLORS.ash }, leftStyle]}>
+      <Animated.View style={[styles.side, { backgroundColor: COLORS.paper, borderRightWidth: 2, borderColor: COLORS.coral, borderStyle: 'solid' }, leftStyle]}>
         {mode === 'signup' ? (
           <Animated.View entering={FadeInDown.delay(200)} style={styles.formCard}>
             <Pressable onPress={reset} style={styles.backBtn}><Text style={styles.backIcon}>✕</Text></Pressable>
             <Text style={styles.title}>Join.</Text>
             <Text style={styles.subtitle}>Create a new account</Text>
             
-            <TextInput placeholder="Name" placeholderTextColor={COLORS.silver} style={styles.input} />
-            <TextInput placeholder="Email" placeholderTextColor={COLORS.silver} style={styles.input} />
+            <TextInput placeholder="Name" placeholderTextColor={COLORS.ink} style={styles.input} />
+            <TextInput placeholder="Email" placeholderTextColor={COLORS.ink} style={styles.input} />
             <View style={styles.passwordContainer}>
               <TextInput
                 placeholder="Password"
-                placeholderTextColor={COLORS.silver}
+                placeholderTextColor={COLORS.ink}
                 secureTextEntry={!showPassword}
                 style={[styles.input, styles.passwordInput]}
               />
@@ -188,24 +209,26 @@ export default function RetroGrayscaleAuth() {
           </Animated.View>
         ) : mode === null && (
           <Pressable onPress={() => handlePress('signup')} style={styles.centered}>
-            <Text style={[styles.verticalLabel, styles.shadowText, { color: COLORS.paper }]}>SIGN UP</Text>
+            <Animated.View style={animatedLabelStyle}>
+              <Text style={[styles.verticalLabel, styles.shadowText, { color: COLORS.ink }]}>SIGN UP</Text>
+            </Animated.View>
           </Pressable>
         )}
       </Animated.View>
 
       {/* LOGIN SIDE (LIGHT GRAY) */}
-      <Animated.View style={[styles.side, { backgroundColor: COLORS.cloud, borderLeftWidth: 2, borderColor: COLORS.ink }, rightStyle]}>
+      <Animated.View style={[styles.side, { backgroundColor: COLORS.cloud, borderLeftWidth: 2, borderColor: COLORS.coral, borderStyle: 'solid' }, rightStyle]}>
         {mode === 'login' ? (
           <Animated.View entering={FadeInDown.delay(200)} style={styles.formCard}>
             <Pressable onPress={reset} style={styles.backBtn}><Text style={styles.backIcon}>✕</Text></Pressable>
             <Text style={styles.title}>Hello.</Text>
             <Text style={styles.subtitle}>Welcome back!</Text>
             
-            <TextInput placeholder="Email" placeholderTextColor={COLORS.silver} style={styles.input} />
+            <TextInput placeholder="Email" placeholderTextColor={COLORS.ink} style={styles.input} />
             <View style={styles.passwordContainer}>
               <TextInput
                 placeholder="Password"
-                placeholderTextColor={COLORS.silver}
+                placeholderTextColor={COLORS.ink}
                 secureTextEntry={!showPassword}
                 style={[styles.input, styles.passwordInput]}
               />
@@ -225,10 +248,13 @@ export default function RetroGrayscaleAuth() {
             <Text style={styles.googleOrText}>or</Text>
             <Pressable style={styles.googleBtn} onPress={() => signInWithGoogle('login')}>
               <Text style={[styles.googleBtnText, { color: COLORS.ink }]}>G</Text>
-            </Pressable>          </Animated.View>
+            </Pressable>
+          </Animated.View>
         ) : mode === null && (
           <Pressable onPress={() => handlePress('login')} style={styles.centered}>
-            <Text style={[styles.verticalLabel, styles.shadowText, { color: COLORS.ink }]}>LOG IN</Text>
+            <Animated.View style={animatedLabelStyle}>
+              <Text style={[styles.verticalLabel, styles.shadowText, { color: COLORS.ink }]}>LOG IN</Text>
+            </Animated.View>
           </Pressable>
         )}
       </Animated.View>
@@ -255,12 +281,13 @@ export default function RetroGrayscaleAuth() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: COLORS.ink,
+    backgroundColor: COLORS.grape,
     flexDirection: 'row',
   },
   side: {
     height: '100%',
     overflow: 'hidden',
+    borderRadius: 40,
   },
   centered: {
     flex: 1,
@@ -269,97 +296,111 @@ const styles = StyleSheet.create({
   },
   verticalLabel: {
     fontFamily: 'Fredoka_700Bold',
-    fontSize: 64,
+    fontSize: 56,
     transform: [{ rotate: '-90deg' }],
     letterSpacing: -1,
   },
   shadowText: {
-    textShadowColor: 'rgba(0,0,0,0.5)',
-    textShadowOffset: { width: 6, height: 6 },
-    textShadowRadius: 1,
+    textShadowColor: 'rgba(0, 0, 0, 0.65)',
+    textShadowOffset: { width: 3, height: 3 },
+    textShadowRadius: 10,
   },
   formCard: {
     flex: 1,
     margin: 20,
-    borderRadius: 30,
+    borderRadius: 44,
     backgroundColor: COLORS.paper,
     borderWidth: 3,
-    borderColor: COLORS.ink,
+    borderColor: COLORS.coral,
+    borderStyle: 'solid',
     paddingHorizontal: 25,
     paddingTop: SCREEN_HEIGHT * 0.15,
-    // Vintage Hard Shadow
-    shadowColor: COLORS.ink,
-    shadowOffset: { width: 8, height: 8 },
-    shadowOpacity: 1,
-    shadowRadius: 0,
+    shadowColor: COLORS.coral,
+    shadowOffset: { width: 0, height: 20 },
+    shadowOpacity: 0.4,
+    shadowRadius: 28,
+    elevation: 20,
   },
   backBtn: {
     position: 'absolute',
     top: 20,
     left: 20,
-    width: 44,
-    height: 44,
-    borderRadius: 12,
+    width: 54,
+    height: 54,
+    borderRadius: 22,
     borderWidth: 2,
-    borderColor: COLORS.ink,
+    borderColor: COLORS.ash,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: COLORS.cloud,
+    backgroundColor: COLORS.bubble,
+    shadowColor: COLORS.ash,
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.35,
+    shadowRadius: 12,
+    elevation: 6,
   },
-  backIcon: { fontSize: 16, fontFamily: 'Fredoka_700Bold', color: COLORS.ink },
+  backIcon: { fontSize: 16, fontFamily: 'Fredoka_700Bold', color: COLORS.ash },
   title: {
     fontFamily: 'Fredoka_700Bold',
-    fontSize: 52,
+    fontSize: 60,
     color: COLORS.ink,
     letterSpacing: -2,
+    textShadowColor: 'rgba(255,255,255,0.16)',
+    textShadowOffset: { width: 0, height: 4 },
+    textShadowRadius: 12,
   },
   subtitle: {
     fontFamily: 'Fredoka_400Regular',
-    fontSize: 16,
+    fontSize: 18,
     color: COLORS.ash,
-    marginBottom: 40,
-    marginTop: -5,
+    marginBottom: 34,
+    marginTop: 2,
   },
   input: {
     height: 60,
-    borderRadius: 16,
-    paddingHorizontal: 15,
+    borderRadius: 24,
+    paddingHorizontal: 18,
     fontSize: 16,
     fontFamily: 'Fredoka_500Medium',
     marginBottom: 15,
     borderWidth: 2,
-    borderColor: COLORS.ink,
-    backgroundColor: COLORS.cloud,
+    borderColor: COLORS.ash,
+    backgroundColor: COLORS.bubble,
+    color: COLORS.ink,
   },
   primaryBtn: {
-    backgroundColor: COLORS.paper,
-    height: 60,
-    borderRadius: 16,
+    backgroundColor: COLORS.coral,
+    height: 64,
+    borderRadius: 32,
     justifyContent: 'center',
     alignItems: 'center',
     marginTop: 10,
-    borderWidth: 3,
-    borderColor: COLORS.ink,
-    shadowColor: COLORS.ink,
-    shadowOffset: { width: 5, height: 5 },
-    shadowOpacity: 1,
-    shadowRadius: 0,
-    elevation: 5,
+    borderWidth: 0,
+    shadowColor: COLORS.ash,
+    shadowOffset: { width: 0, height: 14 },
+    shadowOpacity: 0.35,
+    shadowRadius: 24,
+    elevation: 16,
   },
   primaryBtnText: {
     fontFamily: 'Fredoka_700Bold',
-    fontSize: 18,
-    color: COLORS.ink,
+    fontSize: 20,
+    color: COLORS.paper,
   },
   secondaryBtn: {
-    backgroundColor: COLORS.paper,
+    backgroundColor: COLORS.cloud,
     height: 56,
-    borderRadius: 16,
+    borderRadius: 24,
     justifyContent: 'center',
     alignItems: 'center',
     marginTop: 12,
     borderWidth: 2,
-    borderColor: COLORS.ink,
+    borderColor: COLORS.ash,
+    shadowColor: COLORS.ash,
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.18,
+    shadowRadius: 16,
+    elevation: 10,
   },
   secondaryBtnText: {
     fontFamily: 'Fredoka_700Bold',
@@ -381,10 +422,10 @@ const styles = StyleSheet.create({
     height: 48,
     borderRadius: 14,
     borderWidth: 2,
-    borderColor: COLORS.ink,
+    borderColor: COLORS.ash,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: COLORS.paper,
+    backgroundColor: COLORS.bubble,
   },
   eyeIcon: {
     fontSize: 22,
@@ -393,67 +434,92 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     fontFamily: 'Fredoka_700Bold',
     fontSize: 14,
-    color: COLORS.ash,
+    color: COLORS.ink,
     marginTop: 14,
     marginBottom: 8,
   },
   googleBtn: {
-    width: 56,
-    height: 56,
-    borderRadius: 28,
+    width: 64,
+    height: 64,
+    borderRadius: 32,
     backgroundColor: COLORS.paper,
     borderWidth: 3,
-    borderColor: COLORS.ink,
+    borderColor: COLORS.ash,
     justifyContent: 'center',
     alignItems: 'center',
     alignSelf: 'center',
-    shadowColor: COLORS.ink,
-    shadowOffset: { width: 4, height: 4 },
-    shadowOpacity: 1,
-    shadowRadius: 0,
+    shadowColor: COLORS.ash,
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.28,
+    shadowRadius: 18,
+    elevation: 10,
   },
   googleBtnText: {
     fontFamily: 'Fredoka_700Bold',
     fontSize: 28,
-    color: COLORS.ink,
+    color: COLORS.ash,
+  },
+  cartoonBubbleTop: {
+    position: 'absolute',
+    top: -40,
+    left: -20,
+    width: 180,
+    height: 180,
+    borderRadius: 90,
+    backgroundColor: COLORS.ash,
+    opacity: 0.45,
+  },
+  cartoonBubbleBottom: {
+    position: 'absolute',
+    bottom: -50,
+    right: -30,
+    width: 220,
+    height: 220,
+    borderRadius: 110,
+    backgroundColor: COLORS.peach,
+    opacity: 0.35,
   },
   logoWrapper: {
     position: 'absolute',
     alignSelf: 'center',
-    left: SCREEN_WIDTH / 2 - 60,
-    top: SCREEN_HEIGHT * 0.15, // Positioned slightly top but centered
+    left: SCREEN_WIDTH / 2 - 70,
+    top: SCREEN_HEIGHT * 0.12,
     alignItems: 'center',
     zIndex: 10,
   },
   logoCircle: {
-    width: 120,
-    height: 120,
-    borderRadius: 67, // "Squircle" doodle shape
+    width: 140,
+    height: 140,
+    borderRadius: 80,
     backgroundColor: COLORS.paper,
-    borderWidth: 4,
-    borderColor: COLORS.ink,
+    borderWidth: 5,
+    borderColor: COLORS.coral,
     justifyContent: 'center',
     alignItems: 'center',
-    shadowColor: COLORS.ink,
-    shadowOffset: { width: 6, height: 6 },
-    shadowOpacity: 1,
-    shadowRadius: 0,
+    shadowColor: COLORS.coral,
+    shadowOffset: { width: 0, height: 12 },
+    shadowOpacity: 0.36,
+    shadowRadius: 20,
   },
   logoImage: {
-    width: 70,
-    height: 70,
+    width: 80,
+    height: 80,
   },
   logoBadge: {
-    backgroundColor: COLORS.ink,
-    paddingHorizontal: 15,
-    paddingVertical: 5,
-    borderRadius: 10,
-    marginTop: -15,
-    transform: [{ rotate: '-2deg' }],
+    backgroundColor: COLORS.coral,
+    paddingHorizontal: 18,
+    paddingVertical: 8,
+    borderRadius: 18,
+    marginTop: -18,
+    transform: [{ rotate: '-5deg' }],
+    shadowColor: COLORS.coral,
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.35,
+    shadowRadius: 12,
   },
   logoName: {
     fontFamily: 'Fredoka_700Bold',
-    fontSize: 18,
+    fontSize: 20,
     color: COLORS.paper,
   },
 });
